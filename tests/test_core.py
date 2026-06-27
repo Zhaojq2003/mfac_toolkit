@@ -6,13 +6,14 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pytest
-from pydantic import ValidationError
-
 from mfac_toolkit import CFDLController, FFDLController, MFACConfig, PFDLController
 from mfac_toolkit.analysis import iae, overshoot, pseudo_frequency_response, rmse
 from mfac_toolkit.model import NonlinearDiscretePlant, StateSpacePlant
+from pydantic import ValidationError
 
 
 def test_config_validation() -> None:
@@ -27,7 +28,7 @@ def test_config_validation() -> None:
         MFACConfig(lambda_=-0.1)
 
 
-def test_config_yaml_roundtrip(tmp_path) -> None:
+def test_config_yaml_roundtrip(tmp_path: Path) -> None:
     """配置应能经 YAML 往返后保持一致."""
     cfg = MFACConfig(eta=0.9, mu=2.0, rho=0.5, lambda_=0.2)
     path = tmp_path / "config.yaml"

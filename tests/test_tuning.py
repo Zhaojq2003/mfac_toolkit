@@ -6,9 +6,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 import numpy as np
 import pytest
-
 from mfac_toolkit import FFDLController, MFACConfig, PFDLController
 from mfac_toolkit.tuning import (
     apply_ffdl_critical_tuning,
@@ -236,7 +237,7 @@ def test_physical_pfdl_params_invalid_inputs() -> None:
     ],
 )
 def test_invalid_parameters(
-    func: callable,
+    func: Callable[..., object],
     kwargs: dict[str, float],
 ) -> None:
     """非法参数应抛出 ValueError."""

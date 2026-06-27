@@ -12,7 +12,6 @@ from typing import Any
 
 import pytest
 import yaml
-
 from mfac_toolkit import CFDLController, FFDLController, MFACConfig, PFDLController
 from mfac_toolkit.logger import DataLogger
 
