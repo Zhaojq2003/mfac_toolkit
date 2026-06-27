@@ -7,25 +7,16 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.12%2B-blue" alt="Python 3.12+">
-  <img src="https://img.shields.io/badge/License-Proprietary-lightgrey" alt="License: Proprietary">
+  <img src="https://img.shields.io/badge/License-MIT-green" alt="License: MIT">
 </p>
 
 ---
-
-## 目录
-
-- [特性](#特性)
-- [安装](#安装)
-- [快速开始](#快速开始)
-- [常用命令](#常用命令)
-- [项目结构](#项目结构)
-- [许可证](#许可证)
 
 ## 特性
 
 - 支持 **CFDL**、**PFDL**、**FFDL** 三种动态线性化格式。
 - 高性能 Rust 编译扩展，Python 侧为薄包装，兼顾性能与易用性。
-- `CFDLController.update(y, yd)` / `PFDLController.update(...)` / `FFDLController.update(...)` 仅返回下一时刻控制输入。
+- 控制器接口极简：`controller.update(y, yd)` 只根据当前输出 `y` 与期望输出 `yd` 返回下一时刻控制输入 `u`。
 - YAML 格式的控制器配置，Pydantic 参数校验。
 - 示例中提供非线性离散被控对象与状态空间被控对象，以及可运行的仿真脚本。
 - `DataLogger` 可选地记录每步元数据与控制数据。
@@ -109,7 +100,7 @@ y[-1] = plant.y
 
 ## 许可证
 
-Copyright (c) 2026 RobotX. All rights reserved.  
-Author: Jiqian Zhao <zhaojq2003@163.com>
+本项目采用 [MIT 许可证](LICENSE) 开源。
 
-Proprietary - RobotX. All rights reserved.
+Copyright (c) 2026 RobotX.  
+Author: Jiqian Zhao <zhaojq2003@163.com>
