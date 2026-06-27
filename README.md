@@ -24,23 +24,15 @@
 
 ## 安装 / Installation
 
-### 方式一：安装预编译 wheel（推荐）
-
-从 [GitHub Releases](https://github.com/Zhaojq2003/mfac_toolkit/releases) 下载对应 Python 版本与平台的 wheel，然后本地安装：
+直接安装最新版本：
 
 ```bash
-pip install ./mfac_toolkit-*.whl
+pip install https://github.com/Zhaojq2003/mfac_toolkit/archive/refs/heads/main.zip
 ```
 
-Release 页面会提供形如 `mfac_toolkit-<version>-cp312-cp312-manylinux_2_34_x86_64.whl` 的预编译包。若后续发布到 PyPI，也可直接：
+> 也可以从 [GitHub Releases](https://github.com/Zhaojq2003/mfac_toolkit/releases/latest) 下载最新 `.whl` 后运行 `pip install ./<下载的 whl 文件>`。
 
-```bash
-pip install mfac-toolkit
-```
-
-### 方式二：从源码构建
-
-本仓库包含 Python 源码与预编译扩展。如需本地使用，直接安装即可：
+本地开发可使用：
 
 ```bash
 uv sync --extra dev
@@ -49,29 +41,17 @@ uv pip install -e .
 
 ## 快速开始 / Quick Start
 
-```python
-import numpy as np
-from mfac_toolkit import CFDLController, MFACConfig
-from mfac_toolkit.examples.plants import NonlinearDiscretePlant
+查看 `examples/` 目录下的可运行示例：
 
-plant = NonlinearDiscretePlant(y0=0.0)
-ctrl = CFDLController(MFACConfig(rho=0.1, lambda_=0.02))
+- `examples/basic_example.py`：最小 CFDL 闭环仿真，注释中标注了扩展用法
+- `examples/config.yaml`：YAML 配置示例
+- `examples/plants.py`：示例用离散被控对象
 
-n_steps = 200
-t = np.arange(n_steps) * 0.02
-yd = np.ones(n_steps)
-y = np.zeros(n_steps)
-u = np.zeros(n_steps)
+运行示例：
 
-for k in range(n_steps - 1):
-    y[k] = plant.y
-    u[k] = ctrl.update(y=y[k], yd=yd[k])
-    plant.update(u[k])
-
-y[-1] = plant.y
+```bash
+uv run python examples/basic_example.py
 ```
-
-更完整的参考跟踪示例见 `examples/simulation_example.py`，初值整定示例见 `examples/tuning_example.py`。
 
 ## 常用命令 / Common Commands
 
@@ -97,10 +77,9 @@ y[-1] = plant.y
 │   ├── _mfac_core*.so
 │   └── py.typed
 └── examples/
+    ├── basic_example.py
     ├── config.yaml
-    ├── plants.py
-    ├── simulation_example.py
-    └── tuning_example.py
+    └── plants.py
 ```
 
 ## 许可证 / License

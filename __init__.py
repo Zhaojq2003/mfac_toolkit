@@ -23,7 +23,6 @@ from mfac_toolkit.tuning import (
     critical_proportional_to_pfdl,
     ffdl_critical_tuning,
     ffdl_zn_tuning,
-    physical_pfdl_params,
     pid_to_pfdl,
     zn_response_to_pfdl,
 )
@@ -41,7 +40,6 @@ __all__ = [
     "critical_proportional_to_pfdl",
     "ffdl_critical_tuning",
     "ffdl_zn_tuning",
-    "physical_pfdl_params",
     "pid_to_pfdl",
     "zn_response_to_pfdl",
 ]
