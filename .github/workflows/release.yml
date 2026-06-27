@@ -1,4 +1,4 @@
-name: Build and Release Wheel
+name: Build and Release Wheels
 
 on:
   push:
@@ -9,31 +9,73 @@ permissions:
   contents: write
 
 jobs:
-  build-and-release:
-    runs-on: ubuntu-latest
+  build-wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
     steps:
-      - name: Checkout source
+      - name: Checkout mfac_toolkit
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Checkout private mfac_core
+        uses: actions/checkout@v4
         with:
-          python-version: '3.12'
+          repository: Zhaojq2003/mfac_core
+          token: ${{ secrets.MFAC_CORE_TOKEN }}
+          path: mfac_core
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
+      - name: Install Rust toolchain
+        if: runner.os != 'Linux'
+        uses: dtolnay/rust-toolchain@stable
         with:
-          enable-cache: true
+          toolchain: stable
 
-      - name: Install dependencies
-        run: uv sync --extra dev
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.19
+        env:
+          # Linux manylinux images for glibc compatibility.
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
+          # Python versions matching requires-python (>=3.12).
+          CIBW_BUILD: cp312-* cp313-*
+          # macOS: Intel, Apple Silicon, and universal2 fat binary.
+          CIBW_ARCHS_MACOS: x86_64 arm64 universal2
+          # Windows: 64-bit only.
+          CIBW_ARCHS_WINDOWS: AMD64
+          # Linux: x86_64 and ARM64 (aarch64 via QEMU).
+          CIBW_ARCHS_LINUX: x86_64 aarch64
+          # Skip 32-bit, PyPy, and musl builds.
+          CIBW_SKIP: pp* *-win32 *-manylinux_i686 *-musllinux_*
+          # Install Rust inside the manylinux container (Linux only).
+          CIBW_BEFORE_BUILD_LINUX: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+          CIBW_ENVIRONMENT_LINUX: PATH="$HOME/.cargo/bin:$PATH"
 
-      - name: Build release wheel
-        run: uv build
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
         with:
-          files: dist/*.whl
-          generate_release_notes: true
-          fail_on_unmatched_files: true
+          name: wheels-${{ matrix.os }}
+          path: ./wheelhouse/*.whl
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: build-wheels
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/mfac-toolkit
+    steps:
+      - name: Download wheels
+        uses: actions/download-artifact@v4
+        with:
+          path: wheelhouse
+          merge-multiple: true
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          packages-dir: wheelhouse/

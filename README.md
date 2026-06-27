@@ -24,33 +24,32 @@
 
 ## 安装 / Installation
 
-直接安装最新版本：
+从 PyPI 直接安装（会根据你的操作系统和架构自动选择预编译 wheel）：
 
 ```bash
-pip install https://github.com/Zhaojq2003/mfac_toolkit/archive/refs/heads/main.zip
+pip install mfac-toolkit
 ```
 
-> 也可以从 [GitHub Releases](https://github.com/Zhaojq2003/mfac_toolkit/releases/latest) 下载最新 `.whl` 后运行 `pip install ./<下载的 whl 文件>`。
-
-本地开发可使用：
-
-```bash
-uv sync --extra dev
-uv pip install -e .
-```
+> 也可以从 [GitHub Releases](https://github.com/Zhaojq2003/mfac_toolkit/releases/latest) 下载对应平台的 `.whl` 后运行 `pip install ./<下载的 whl 文件>`。
 
 ## 快速开始 / Quick Start
 
-查看 `examples/` 目录下的可运行示例：
+查看包内示例：
 
-- `examples/basic_example.py`：最小 CFDL 闭环仿真，注释中标注了扩展用法
-- `examples/config.yaml`：YAML 配置示例
-- `examples/plants.py`：示例用离散被控对象
+- `mfac_toolkit.examples.basic_example`：最小 CFDL 闭环仿真
+- `mfac_toolkit.examples.config`：YAML 配置示例
+- `mfac_toolkit.examples.plants`：示例用离散被控对象
 
-运行示例：
+安装后可直接运行：
 
 ```bash
-uv run python examples/basic_example.py
+python -m mfac_toolkit.examples.basic_example
+```
+
+本地源码开发时（已安装可编辑模式）：
+
+```bash
+uv run python -m mfac_toolkit.examples.basic_example
 ```
 
 ## 常用命令 / Common Commands
@@ -58,29 +57,40 @@ uv run python examples/basic_example.py
 | 任务 | 命令 |
 |------|------|
 | 同步依赖 | `uv sync --extra dev` |
-| 运行示例 | `uv run python examples/simulation_example.py` |
+| 运行示例 | `uv run python -m mfac_toolkit.examples.basic_example` |
 | 代码检查 | `uv run ruff check .` |
 | 类型检查 | `uv run mypy .` |
-| 构建 wheel | `uv build` |
+| 开发模式构建 | `uv run maturin develop` |
+| 构建 release wheel | `uv run maturin build --release` |
 
 ## 项目结构 / Project Structure
 
 ```
 .
-├── mfac_toolkit/       # Python 包
+├── mfac_toolkit/           # Python 包
 │   ├── __init__.py
 │   ├── config.py
 │   ├── controller.py
 │   ├── logger.py
 │   ├── tuning.py
 │   ├── _mfac_core.pyi
-│   ├── _mfac_core*.so
-│   └── py.typed
-└── examples/
-    ├── basic_example.py
-    ├── config.yaml
-    └── plants.py
+│   ├── py.typed
+│   └── examples/
+│       ├── basic_example.py
+│       ├── config.yaml
+│       └── plants.py
+└── pyproject.toml
 ```
+
+## 跨平台 Wheel 构建 / Cross-Platform Wheels
+
+`mfac_toolkit` 使用 [maturin](https://github.com/PyO3/maturin) 编译 Rust 扩展，并通过 [cibuildwheel](https://github.com/pypa/cibuildwheel) 在 GitHub Actions 中生成以下平台的 wheel：
+
+- Linux: `x86_64`、`aarch64`（manylinux2014）
+- macOS: `x86_64`、`arm64`、`universal2`
+- Windows: `AMD64`
+
+打 `v*` tag 时会自动触发构建并发布到 PyPI。
 
 ## 许可证 / License
 

@@ -4,9 +4,9 @@
 
 """MFAC 最小示例：从 YAML 读取配置并运行闭环仿真.
 
-运行: uv run python examples/basic_example.py
+运行: uv run python -m mfac_toolkit.examples.basic_example
 
-修改 `examples/config.yaml` 即可切换 CFDL/PFDL/FFDL 或调整参数.
+修改 `mfac_toolkit/examples/config.yaml` 即可切换 CFDL/PFDL/FFDL 或调整参数.
 """
 
 from __future__ import annotations
