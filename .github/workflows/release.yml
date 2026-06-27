@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest]
 
     steps:
       - name: Checkout mfac_toolkit
@@ -37,19 +37,16 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.19
         env:
-          # Linux manylinux images for glibc compatibility.
+          # Linux manylinux image for glibc compatibility.
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
-          # Python versions matching requires-python (>=3.12).
-          CIBW_BUILD: cp312-* cp313-*
-          # macOS: Intel, Apple Silicon, and universal2 fat binary.
-          CIBW_ARCHS_MACOS: x86_64 arm64 universal2
+          # abi3-py312 wheel covers Python 3.12+.
+          CIBW_BUILD: cp312-*
           # Windows: 64-bit only.
           CIBW_ARCHS_WINDOWS: AMD64
-          # Linux: x86_64 and ARM64 (aarch64 via QEMU).
-          CIBW_ARCHS_LINUX: x86_64 aarch64
-          # Skip 32-bit, PyPy, and musl builds.
-          CIBW_SKIP: pp* *-win32 *-manylinux_i686 *-musllinux_*
+          # Linux: x86_64 only.
+          CIBW_ARCHS_LINUX: x86_64
+          # Skip 32-bit, PyPy, ARM64 and musl builds.
+          CIBW_SKIP: pp* *-win32 *-manylinux_i686 *-musllinux_* *-aarch64
           # Install Rust inside the manylinux container (Linux only).
           CIBW_BEFORE_BUILD_LINUX: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           CIBW_ENVIRONMENT_LINUX: PATH="$HOME/.cargo/bin:$PATH"
@@ -79,3 +76,23 @@ jobs:
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
           packages-dir: wheelhouse/
+
+  publish-github-release:
+    name: Create GitHub Release
+    needs: build-wheels
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download wheels
+        uses: actions/download-artifact@v4
+        with:
+          path: wheelhouse
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: wheelhouse/*.whl
+          generate_release_notes: true
+          fail_on_unmatched_files: true

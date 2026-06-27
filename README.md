@@ -24,13 +24,36 @@
 
 ## 安装 / Installation
 
-从 PyPI 直接安装（会根据你的操作系统和架构自动选择预编译 wheel）：
+### 方式一：从 PyPI 安装（推荐）
 
 ```bash
 pip install mfac-toolkit
 ```
 
-> 也可以从 [GitHub Releases](https://github.com/Zhaojq2003/mfac_toolkit/releases/latest) 下载对应平台的 `.whl` 后运行 `pip install ./<下载的 whl 文件>`。
+pip 会根据你的操作系统和架构自动选择对应的预编译 wheel。
+
+### 方式二：从 GitHub Release 下载安装
+
+如果 PyPI 安装较慢或失败，可以从 [GitHub Releases](https://github.com/Zhaojq2003/mfac_toolkit/releases/latest) 下载与自己平台对应的 `.whl`：
+
+- Linux x86_64：`mfac_toolkit-*-cp312-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl`
+- Windows x86_64：`mfac_toolkit-*-cp312-abi3-win_amd64.whl`
+
+然后执行：
+
+```bash
+pip install ./<下载的 whl 文件>
+```
+
+### 方式三：直接克隆使用
+
+仓库里已经包含预编译的 Rust 扩展，直接克隆安装即可使用：
+
+```bash
+git clone https://github.com/Zhaojq2003/mfac_toolkit.git
+cd mfac_toolkit
+pip install -e .
+```
 
 ## 快速开始 / Quick Start
 
@@ -86,11 +109,8 @@ uv run python -m mfac_toolkit.examples.basic_example
 
 `mfac_toolkit` 使用 [maturin](https://github.com/PyO3/maturin) 编译 Rust 扩展，并通过 [cibuildwheel](https://github.com/pypa/cibuildwheel) 在 GitHub Actions 中生成以下平台的 wheel：
 
-- Linux: `x86_64`、`aarch64`（manylinux2014）
-- macOS: `x86_64`、`arm64`、`universal2`
+- Linux: `x86_64`（manylinux2014）
 - Windows: `AMD64`
-
-打 `v*` tag 时会自动触发构建并发布到 PyPI。
 
 ## 许可证 / License
 
@@ -98,4 +118,4 @@ uv run python -m mfac_toolkit.examples.basic_example
 
 MIT License  
 Copyright (c) 2026 北方工业大学 RobotX 实验室 (RobotX Lab, North China University of Technology)  
-Author: RobotX 实验室 (RobotX Lab) <zhaojq2003@163.com>
+Author: Jiqian Zhao <zhaojq2003@163.com>
