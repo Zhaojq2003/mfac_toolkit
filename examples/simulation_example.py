@@ -16,7 +16,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from mfac_toolkit import DataLogger, MFACConfig, create_controller
-from mfac_toolkit.model import NonlinearDiscretePlant
+from mfac_toolkit.examples.plants import NonlinearDiscretePlant
 
 
 def generate_reference(time_steps: int, dt: float) -> NDArray[np.float64]:

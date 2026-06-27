@@ -11,7 +11,7 @@ Author: Jiqian Zhao <zhaojq2003@163.com>
 - 高性能编译扩展，Python 侧为薄包装，兼顾性能与易用性。
 - `CFDLController.update(y, yd)` / `PFDLController.update(...)` / `FFDLController.update(...)` 仅返回下一时刻控制输入。
 - YAML 格式的控制器配置，Pydantic 参数校验。
-- 包含非线性离散被控对象与状态空间被控对象示例，以及可运行的仿真脚本。
+- 示例中提供非线性离散被控对象与状态空间被控对象，以及可运行的仿真脚本。
 - `DataLogger` 可选地记录每步元数据与控制数据。
 
 ## 安装
@@ -40,7 +40,7 @@ uv pip install -e .
 ```python
 import numpy as np
 from mfac_toolkit import CFDLController, MFACConfig
-from mfac_toolkit.model import NonlinearDiscretePlant
+from mfac_toolkit.examples.plants import NonlinearDiscretePlant
 
 plant = NonlinearDiscretePlant(y0=0.0)
 ctrl = CFDLController(MFACConfig(rho=0.1, lambda_=0.02))
@@ -80,7 +80,6 @@ y[-1] = plant.y
 │   ├── config.py
 │   ├── controller.py
 │   ├── logger.py
-│   ├── model.py
 │   ├── tuning.py
 │   ├── _mfac_core.pyi
 │   ├── _mfac_core*.so

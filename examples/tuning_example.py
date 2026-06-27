@@ -24,7 +24,7 @@ from matplotlib import pyplot as plt
 from numpy.typing import NDArray
 
 from mfac_toolkit import MFACConfig, PFDLController
-from mfac_toolkit.model import StateSpacePlant
+from mfac_toolkit.examples.plants import StateSpacePlant
 from mfac_toolkit.tuning import apply_pfdl_initial_guess, pid_to_pfdl
 
 
