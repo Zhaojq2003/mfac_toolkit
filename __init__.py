@@ -5,11 +5,10 @@
 """MFAC：无模型自适应控制工具包.
 
 本包提供基于紧格式（CFDL）、偏格式（PFDL）与全格式（FFDL）动态
-线性化的无模型自适应控制器，适用于 SISO 离散时间系统，同时包含
-仿真后的分析与可视化工具。
+线性化的无模型自适应控制器，适用于 SISO 离散时间系统。
 
 控制循环本身不记录历史数据：用户需在外部仿真脚本中收集时间序列，
-再将其传入 ``mfac_toolkit.analysis`` 和 ``mfac_toolkit.visualization`` 进行处理。
+再使用自定义或第三方工具进行分析与可视化。
 """
 
 from __future__ import annotations

@@ -22,6 +22,7 @@ dist/
 .ruff_cache/
 .coverage
 htmlcov/
+tests/
 
 # IDE
 .vscode/
@@ -38,3 +39,7 @@ log/
 
 # Example generated artifacts
 examples/output/
+
+# Future modules (not included in current release)
+analysis/
+visualization/

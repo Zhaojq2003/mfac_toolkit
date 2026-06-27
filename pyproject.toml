@@ -46,9 +46,7 @@ Issues = "https://github.com/Zhaojq2003/mfac_toolkit/issues"
 [tool.setuptools]
 packages = [
     "mfac_toolkit",
-    "mfac_toolkit.analysis",
     "mfac_toolkit.examples",
-    "mfac_toolkit.visualization",
 ]
 package-dir = {"mfac_toolkit" = "."}
 include-package-data = true

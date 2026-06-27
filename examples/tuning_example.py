@@ -12,7 +12,7 @@
 
 运行::
 
-    uv run python mfac_toolkit/examples/tuning_example.py
+    uv run python examples/tuning_example.py
 """
 
 from __future__ import annotations
