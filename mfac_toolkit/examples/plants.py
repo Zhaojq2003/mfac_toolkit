@@ -1,5 +1,5 @@
 # Copyright (c) 2026 北方工业大学 RobotX 实验室 (RobotX Lab, North China University of Technology).
-# Author: RobotX 实验室 (RobotX Lab) <zhaojq2003@163.com>
+# Author: Jiqian Zhao <zhaojq2003@163.com>
 # Date: 2026-06-27
 
 """示例用离散时间被控对象."""
