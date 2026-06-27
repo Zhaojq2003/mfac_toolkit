@@ -4,7 +4,8 @@ __pycache__/
 *$py.class
 *.so
 !mfac_toolkit/_mfac_core.abi3.so
-!mfac_toolkit/_mfac_core.abi3.pyd
+*.pyd
+!mfac_toolkit/_mfac_core.pyd
 .Python
 .venv/
 venv/
