@@ -1,14 +1,30 @@
 # MFAC Toolkit
 
-Copyright (c) 2026 RobotX. All rights reserved.  
-Author: Jiqian Zhao <zhaojq2003@163.com>
+<p align="center">
+  <strong>基于紧格式 / 偏格式 / 全格式动态线性化的无模型自适应控制 Python 工具包</strong><br>
+  <em>面向 SISO 离散时间系统</em>
+</p>
 
-基于**紧格式（CFDL）、偏格式（PFDL）与全格式（FFDL）动态线性化**的**无模型自适应控制（MFAC）**生产级 Python 工具包，面向 SISO 离散时间系统。
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.12%2B-blue" alt="Python 3.12+">
+  <img src="https://img.shields.io/badge/License-Proprietary-lightgrey" alt="License: Proprietary">
+</p>
+
+---
+
+## 目录
+
+- [特性](#特性)
+- [安装](#安装)
+- [快速开始](#快速开始)
+- [常用命令](#常用命令)
+- [项目结构](#项目结构)
+- [许可证](#许可证)
 
 ## 特性
 
-- 支持 CFDL、PFDL、FFDL 三种动态线性化格式。
-- 高性能编译扩展，Python 侧为薄包装，兼顾性能与易用性。
+- 支持 **CFDL**、**PFDL**、**FFDL** 三种动态线性化格式。
+- 高性能 Rust 编译扩展，Python 侧为薄包装，兼顾性能与易用性。
 - `CFDLController.update(y, yd)` / `PFDLController.update(...)` / `FFDLController.update(...)` 仅返回下一时刻控制输入。
 - YAML 格式的控制器配置，Pydantic 参数校验。
 - 示例中提供非线性离散被控对象与状态空间被控对象，以及可运行的仿真脚本。
@@ -59,7 +75,7 @@ for k in range(n_steps - 1):
 y[-1] = plant.y
 ```
 
-更完整的参考跟踪示例见 `examples/simulation_example.py`。
+更完整的参考跟踪示例见 `examples/simulation_example.py`，初值整定示例见 `examples/tuning_example.py`。
 
 ## 常用命令
 
@@ -85,8 +101,15 @@ y[-1] = plant.y
 │   ├── _mfac_core*.so
 │   └── py.typed
 └── examples/
+    ├── config.yaml
+    ├── plants.py
+    ├── simulation_example.py
+    └── tuning_example.py
 ```
 
 ## 许可证
+
+Copyright (c) 2026 RobotX. All rights reserved.  
+Author: Jiqian Zhao <zhaojq2003@163.com>
 
 Proprietary - RobotX. All rights reserved.
