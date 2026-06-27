@@ -2,7 +2,7 @@
 # Author: Jiqian Zhao <zhaojq2003@163.com>
 # Date: 2026-06-27
 
-"""MFAC 主控制器：Rust 扩展的薄包装."""
+"""MFAC 主控制器：编译扩展的薄包装."""
 
 from __future__ import annotations
 
@@ -43,11 +43,11 @@ class MFACController(Protocol):
 
 def _require_core() -> None:
     if _core is None:
-        raise ImportError("MFAC 控制器需要编译后的 Rust 扩展 _mfac_core")
+        raise ImportError("MFAC 控制器需要编译后的扩展 _mfac_core")
 
 
 class CFDLController:
-    """基于紧格式动态线性化的无模型自适应控制器（Rust 包装）."""
+    """基于紧格式动态线性化的无模型自适应控制器."""
 
     def __init__(self, config: MFACConfig, logger: DataLogger | None = None) -> None:
         self.config: MFACConfig = config
@@ -63,7 +63,7 @@ class CFDLController:
                 },
             )
         _require_core()
-        self._rust: Any = _core.CFDLController(
+        self._backend: Any = _core.CFDLController(
             eta=config.eta,
             mu=config.mu,
             rho=config.rho,
@@ -83,7 +83,7 @@ class CFDLController:
 
     def reset(self) -> None:
         """将控制器重置为初始状态."""
-        self._rust.reset()
+        self._backend.reset()
         self.y_prev = 0.0
         self.u_prev = float(self.config.u0)
         self.u_prev2 = float(self.config.u0)
@@ -93,7 +93,7 @@ class CFDLController:
         """计算一个采样步的控制输入."""
         y = float(y)
         yd = float(yd)
-        u, delta_y, delta_u, e, phi = self._rust.update(y, yd)
+        u, delta_y, delta_u, e, phi = self._backend.update(y, yd)
         u_prev_old = self.u_prev
         y_prev_old = self.y_prev
         delta_u_new = u - self.u_prev
@@ -121,7 +121,7 @@ class CFDLController:
 
     def get_phi(self) -> NDArray[np.float64]:
         """返回当前 PPD 估计值（长度为 1 的向量）."""
-        return np.array(self._rust.get_phi(), dtype=np.float64)
+        return np.array(self._backend.get_phi(), dtype=np.float64)
 
     def set_phi_hat(self, phi: Sequence[float] | NDArray[np.float64]) -> None:
         """设置当前 PPD 估计值.
@@ -132,11 +132,11 @@ class CFDLController:
         phi_vec = np.asarray(phi, dtype=np.float64).reshape(-1)
         if phi_vec.shape != (1,):
             raise ValueError(f"CFDL 的 phi_hat 长度应为 1，实际为 {phi_vec.shape}")
-        self._rust.set_phi_hat(phi_vec.tolist())
+        self._backend.set_phi_hat(phi_vec.tolist())
 
 
 class PFDLController:
-    """基于偏格式动态线性化的无模型自适应控制器（Rust 包装）."""
+    """基于偏格式动态线性化的无模型自适应控制器."""
 
     def __init__(self, config: MFACConfig, logger: DataLogger | None = None) -> None:
         if config.L_y != 0:
@@ -156,7 +156,7 @@ class PFDLController:
                 },
             )
         _require_core()
-        self._rust: Any = _core.PFDLController(
+        self._backend: Any = _core.PFDLController(
             eta=config.eta,
             mu=config.mu,
             rho=config.rho,
@@ -175,7 +175,7 @@ class PFDLController:
 
     def reset(self) -> None:
         """将控制器重置为初始状态."""
-        self._rust.reset()
+        self._backend.reset()
         self._prev_u = float(self.config.u0)
         self._prev_y = 0.0
         self._step = 0
@@ -188,7 +188,7 @@ class PFDLController:
         y_prev_old = self._prev_y
 
         if self.logger is not None:
-            u, delta_y, delta_u, e, phi = self._rust.update_logged(y, yd)
+            u, delta_y, delta_u, e, phi = self._backend.update_logged(y, yd)
             delta_u_new = u - u_prev_old
             self._prev_u = u
             self._prev_y = y
@@ -210,25 +210,25 @@ class PFDLController:
             self.logger.log_step(**row)
             self._step += 1
         else:
-            u = self._rust.update(y, yd)
+            u = self._backend.update(y, yd)
             self._prev_u = u
             self._prev_y = y
         return float(u)
 
     def get_phi(self) -> NDArray[np.float64]:
         """返回当前 PPD 估计向量."""
-        return np.array(self._rust.get_phi(), dtype=np.float64)
+        return np.array(self._backend.get_phi(), dtype=np.float64)
 
     def set_phi_hat(self, phi: Sequence[float] | NDArray[np.float64]) -> None:
         """设置当前 PPD 估计向量."""
         phi_vec = np.asarray(phi, dtype=np.float64).reshape(-1)
         if phi_vec.shape != (self.config.L_u,):
             raise ValueError(f"phi_hat 形状应为 ({self.config.L_u},)，实际为 {phi_vec.shape}")
-        self._rust.set_phi_hat(phi_vec.tolist())
+        self._backend.set_phi_hat(phi_vec.tolist())
 
 
 class FFDLController:
-    """基于全格式动态线性化的无模型自适应控制器（Rust 包装）."""
+    """基于全格式动态线性化的无模型自适应控制器."""
 
     def __init__(self, config: MFACConfig, logger: DataLogger | None = None) -> None:
         if config.L_u < 1:
@@ -246,7 +246,7 @@ class FFDLController:
                 },
             )
         _require_core()
-        self._rust: Any = _core.FFDLController(
+        self._backend: Any = _core.FFDLController(
             eta=config.eta,
             mu=config.mu,
             rho=config.rho,
@@ -266,7 +266,7 @@ class FFDLController:
 
     def reset(self) -> None:
         """将控制器重置为初始状态."""
-        self._rust.reset()
+        self._backend.reset()
         self._prev_u = float(self.config.u0)
         self._prev_y = 0.0
         self._step = 0
@@ -279,7 +279,7 @@ class FFDLController:
         y_prev_old = self._prev_y
 
         if self.logger is not None:
-            u, delta_y, delta_h, e, phi = self._rust.update_logged(y, yd)
+            u, delta_y, delta_h, e, phi = self._backend.update_logged(y, yd)
             delta_u_new = u - u_prev_old
             self._prev_u = u
             self._prev_y = y
@@ -301,14 +301,14 @@ class FFDLController:
             self.logger.log_step(**row)
             self._step += 1
         else:
-            u = self._rust.update(y, yd)
+            u = self._backend.update(y, yd)
             self._prev_u = u
             self._prev_y = y
         return float(u)
 
     def get_phi(self) -> NDArray[np.float64]:
         """返回当前 PPD 估计向量."""
-        return np.array(self._rust.get_phi(), dtype=np.float64)
+        return np.array(self._backend.get_phi(), dtype=np.float64)
 
     def set_phi_hat(self, phi: Sequence[float] | NDArray[np.float64]) -> None:
         """设置当前 PPD 估计向量."""
@@ -316,7 +316,7 @@ class FFDLController:
         phi_vec = np.asarray(phi, dtype=np.float64).reshape(-1)
         if phi_vec.shape != (dim,):
             raise ValueError(f"phi_hat 形状应为 ({dim},)，实际为 {phi_vec.shape}")
-        self._rust.set_phi_hat(phi_vec.tolist())
+        self._backend.set_phi_hat(phi_vec.tolist())
 
     def set_rho_vector(self, rho: Sequence[float] | NDArray[np.float64]) -> None:
         """设置 FFDL 控制律的 per-component 步长因子."""
@@ -324,7 +324,7 @@ class FFDLController:
         rho_vec = np.asarray(rho, dtype=np.float64).reshape(-1)
         if rho_vec.shape != (dim,):
             raise ValueError(f"rho_vector 长度应为 ({dim},)，实际为 {rho_vec.shape}")
-        self._rust.set_rho_vector(rho_vec.tolist())
+        self._backend.set_rho_vector(rho_vec.tolist())
         self.rho_vector = rho_vec
 
 

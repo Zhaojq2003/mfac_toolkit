@@ -4,8 +4,8 @@
 
 """直接型 PFDL-MFAC 与间接型 FFDL-MFAC 伪梯度/步长因子整定模块.
 
-本模块为 ``mfac_toolkit._mfac_core`` 中 Rust 实现整定算法的薄包装，仅负责将
-返回的 ``Vec<f64>`` 转换为 NumPy 数组，并保持原有公开 API 不变。
+本模块为 ``mfac_toolkit._mfac_core`` 中编译扩展整定接口的薄包装，仅负责将
+返回结果转换为 NumPy 数组，并保持原有公开 API 不变。
 """
 
 from __future__ import annotations
@@ -33,7 +33,7 @@ __all__ = [
 
 
 def _as_float_array(values: list[float]) -> NDArray[np.float64]:
-    """将 Rust 返回的浮点列表转为 NumPy 数组."""
+    """将编译扩展返回的浮点列表转为 NumPy 数组."""
     return np.array(values, dtype=np.float64)
 
 
@@ -109,7 +109,7 @@ def apply_pfdl_initial_guess(
         ValueError: 当向量长度与控制器伪阶数不匹配时抛出。
     """
     psi_vec = np.asarray(psi, dtype=np.float64).reshape(-1)
-    _core.apply_pfdl_initial_guess(controller._rust, psi_vec.tolist())
+    _core.apply_pfdl_initial_guess(controller._backend, psi_vec.tolist())
 
 
 def ffdl_zn_tuning(
@@ -131,7 +131,7 @@ def ffdl_zn_tuning(
     返回:
         长度 ``L_y + L_u`` 的步长因子向量 ``rho``。
     """
-    return _as_float_array(_core.ffdl_zn_tuning(controller._rust, k, tau, time_delay, ts))
+    return _as_float_array(_core.ffdl_zn_tuning(controller._backend, k, tau, time_delay, ts))
 
 
 def apply_ffdl_zn_tuning(
@@ -163,7 +163,7 @@ def ffdl_critical_tuning(
     返回:
         长度 ``L_y + L_u`` 的步长因子向量 ``rho``。
     """
-    return _as_float_array(_core.ffdl_critical_tuning(controller._rust, ku, tu, ts))
+    return _as_float_array(_core.ffdl_critical_tuning(controller._backend, ku, tu, ts))
 
 
 def apply_ffdl_critical_tuning(

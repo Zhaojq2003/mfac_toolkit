@@ -2,7 +2,7 @@
 # Author: Jiqian Zhao <zhaojq2003@163.com>
 # Date: 2026-06-27
 
-"""Rust 扩展 `_mfac_core` 的类型存根."""
+"""编译扩展 `_mfac_core` 的类型存根."""
 
 class CFDLController:
     def __init__(

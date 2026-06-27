@@ -8,7 +8,7 @@ Author: Jiqian Zhao <zhaojq2003@163.com>
 ## 特性
 
 - 支持 CFDL、PFDL、FFDL 三种动态线性化格式。
-- 核心控制循环使用 Rust 实现，Python 侧为薄包装，兼顾性能与易用性。
+- 高性能编译扩展，Python 侧为薄包装，兼顾性能与易用性。
 - `CFDLController.update(y, yd)` / `PFDLController.update(...)` / `FFDLController.update(...)` 仅返回下一时刻控制输入。
 - YAML 格式的控制器配置，Pydantic 参数校验。
 - 包含非线性离散被控对象与状态空间被控对象示例，以及可运行的仿真脚本。
@@ -28,7 +28,7 @@ pip install https://github.com/Zhaojq2003/mfac_toolkit/releases/download/v1.0.0/
 
 ### 方式二：从源码构建
 
-本仓库仅包含 Python 源码与预编译的 Rust 扩展。若希望从源码构建 Rust 扩展，请先在私有仓库 `mfac_core` 中完成构建，再将生成的 `.so` 文件复制到本仓库根目录。
+本仓库包含 Python 源码与预编译扩展。如需本地使用，直接安装即可：
 
 ```bash
 uv sync --extra dev
@@ -87,12 +87,6 @@ y[-1] = plant.y
 │   └── py.typed
 └── examples/
 ```
-
-## 闭源分发说明
-
-本仓库对外公开 Python 工具包源码，核心 Rust 算法源码位于私有仓库 `mfac_core`。
-
-对外发布版本通过 GitHub Releases 提供预编译的 x86_64 manylinux wheel。
 
 ## 许可证
 
