@@ -94,7 +94,7 @@ python -m mfac_toolkit.examples.basic_example
 
 ## 文档
 
-- [英文教程 / Tutorial](./TUTORIAL.md)
+- [教程](./TUTORIAL.md)
 - [更新日志](./CHANGELOG.md)
 
 ## 许可证
