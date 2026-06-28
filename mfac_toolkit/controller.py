@@ -78,7 +78,6 @@ class CFDLController:
         )
         self.y_prev: float = 0.0
         self.u_prev: float = float(config.u0)
-        self.u_prev2: float = float(config.u0)
         self._step: int = 0
 
     def reset(self) -> None:
@@ -86,7 +85,6 @@ class CFDLController:
         self._backend.reset()
         self.y_prev = 0.0
         self.u_prev = float(self.config.u0)
-        self.u_prev2 = float(self.config.u0)
         self._step = 0
 
     def update(self, y: float, yd: float) -> float:
@@ -98,7 +96,6 @@ class CFDLController:
         y_prev_old = self.y_prev
         delta_u_new = u - self.u_prev
 
-        self.u_prev2 = self.u_prev
         self.u_prev = u
         self.y_prev = y
 
@@ -270,6 +267,7 @@ class FFDLController:
         self._prev_u = float(self.config.u0)
         self._prev_y = 0.0
         self._step = 0
+        self.rho_vector = None
 
     def update(self, y: float, yd: float) -> float:
         """计算一个采样步的控制输入."""
