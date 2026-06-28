@@ -6,7 +6,6 @@
 
 from __future__ import annotations
 
-import warnings
 from pathlib import Path
 from typing import Any, Self
 
@@ -108,22 +107,3 @@ class MFACConfig(BaseModel):
         path = Path(path)
         with path.open("w", encoding="utf-8") as file:
             yaml.safe_dump(self.model_dump(), file, sort_keys=False)
-
-
-class MimoConfig(MFACConfig):
-    """MIMO MFAC 控制器配置.
-
-    .. deprecated::
-        请改用 ``MFACConfig(dim=...)``，此类将在未来版本移除。
-    """
-
-    dim: int = Field(default=2, ge=1)
-
-    def __init__(self, **data: Any) -> None:
-        """初始化并发出弃用警告."""
-        warnings.warn(
-            "MimoConfig 已弃用，请改用 MFACConfig(dim=...)。",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(**data)

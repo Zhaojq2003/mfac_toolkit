@@ -4,6 +4,16 @@
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-06-28
+
+### Changed
+
+- 将 `controller.py` 拆分为 `controller/` 子包：`_base.py`、`_siso.py`、`_mimo.py`，公开接口保持不变。
+
+### Removed
+
+- 删除已弃用的 `MimoConfig`，请改用 `MFACConfig(dim=...)`。
+
 ## [1.1.0] - 2026-06-28
 
 ### Added

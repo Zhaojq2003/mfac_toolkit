@@ -13,7 +13,7 @@
 
 from __future__ import annotations
 
-from mfac_toolkit.config import MFACConfig, MimoConfig
+from mfac_toolkit.config import MFACConfig
 from mfac_toolkit.controller import (
     CFDLController,
     FFDLController,
@@ -44,7 +44,6 @@ __all__ = [
     "MimoFfdlController",
     "create_controller",
     "MFACConfig",
-    "MimoConfig",
     "DataLogger",
     "apply_ffdl_critical_tuning",
     "apply_ffdl_zn_tuning",

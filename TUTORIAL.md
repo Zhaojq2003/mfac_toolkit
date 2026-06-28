@@ -49,8 +49,6 @@ config.to_yaml("config.yaml")
 | `enable_logging` | `False` | 是否记录每步数据 |
 | `log_dir` | `"log"` | 日志保存根目录 |
 
-`MimoConfig` 已弃用，请改用 `MFACConfig(dim=...)`。
-
 ## 控制器
 
 `create_controller(config)` 根据 `controller` 与 `dim` 自动选择控制器。
