@@ -57,3 +57,24 @@ def test_ffdl_rho_vector_reset() -> None:
 
     controller.reset()
     assert controller.rho_vector is None
+
+
+def test_pfdl_initial_phi_vector() -> None:
+    """PFDL 使用向量 initial_phi 时 get_phi 形状与值应正确."""
+    cfg = MFACConfig(controller="PFDL", L_u=3, initial_phi=[0.1, 0.2, 0.3])
+    controller = PFDLController(cfg)
+    np.testing.assert_array_equal(controller.get_phi(), [0.1, 0.2, 0.3])
+
+    controller.reset()
+    np.testing.assert_array_equal(controller.get_phi(), [0.1, 0.2, 0.3])
+
+
+def test_ffdl_initial_phi_vector() -> None:
+    """FFDL 使用向量 initial_phi 时 get_phi 形状与值应正确."""
+    phi = [0.1, 0.2, 0.3]
+    cfg = MFACConfig(controller="FFDL", L_y=1, L_u=2, initial_phi=phi)
+    controller = FFDLController(cfg)
+    np.testing.assert_array_equal(controller.get_phi(), phi)
+
+    controller.reset()
+    np.testing.assert_array_equal(controller.get_phi(), phi)

@@ -81,3 +81,51 @@ class StateSpacePlant:
         self.x = self.A @ self.x + (self.B @ self._u_vec).ravel()
         y = (self.C @ self.x.reshape(-1, 1) + self.D @ self._u_vec).item()
         return float(y)
+
+
+class MimoLinearPlant:
+    r"""MIMO 线性时不变静态增益被控对象.
+
+    .. math::
+        y(k+1) = G \, u(k)
+
+    适用于演示 MIMO 控制器的解耦与跟踪效果。
+    """
+
+    def __init__(
+        self,
+        gain: NDArray[np.float64],
+        y0: NDArray[np.float64] | None = None,
+    ) -> None:
+        """初始化静态增益矩阵与初始输出.
+
+        参数:
+            gain: 形状为 (dim, dim) 的增益矩阵 :math:`G`。
+            y0: 初始输出向量，形状 (dim,)；默认为零向量。
+        """
+        self.gain = np.asarray(gain, dtype=np.float64)
+        if self.gain.ndim != 2 or self.gain.shape[0] != self.gain.shape[1]:
+            raise ValueError("gain 必须为方阵")
+
+        self.dim = self.gain.shape[0]
+        self.y0 = (
+            np.zeros(self.dim, dtype=np.float64)
+            if y0 is None
+            else np.asarray(y0, dtype=np.float64)
+        )
+        if self.y0.shape != (self.dim,):
+            raise ValueError("y0 形状必须为 (dim,)")
+
+        self.y: NDArray[np.float64] = self.y0.copy()
+
+    def reset(self) -> None:
+        """重置输出为 ``y0``."""
+        self.y = self.y0.copy()
+
+    def update(self, u: NDArray[np.float64]) -> NDArray[np.float64]:
+        """推进被控对象一个采样步，返回下一步输出向量."""
+        u_arr = np.asarray(u, dtype=np.float64).reshape(-1)
+        if u_arr.shape != (self.dim,):
+            raise ValueError(f"u 形状 {u_arr.shape} ≠ ({self.dim},)")
+        self.y = self.gain @ u_arr
+        return self.y.copy()

@@ -1,0 +1,74 @@
+# MIMO MFAC 控制器可调参数示例
+# 所有字段均为可选；缺失字段将使用 MFACConfig 默认值。
+#
+# 本配置演示如何在 YAML 中直接传入多个 PJM 矩阵作为 initial_phi。
+# 当前为 MIMO-PFDL，L_u = 2，initial_phi 形状为 (L_u, dim, dim)。
+
+# 控制器格式：可选 CFDL / PFDL / FFDL。
+# CFDL: L_y = 0, L_u = 1
+# PFDL: L_y = 0, L_u >= 1
+# FFDL: L_y >= 1, L_u >= 1
+controller: "PFDL"
+
+# 系统维度 m。dim = 1 为 SISO，dim >= 2 为 MIMO；改此值即可切换。
+dim: 2
+
+# PPD 投影算法学习率，对应标准公式中的 η。
+# 有效范围：0 < eta <= 2
+eta: 1.0
+
+# 投影算法分母正则化项，对应标准公式中的 μ。
+# 必须为正数，用于防止除零并平滑估计。
+mu: 1.0
+
+# 控制律步长因子，对应标准公式中的 ρ。
+# 有效范围：0 < rho <= 1
+rho: 0.8
+
+# 控制增量加权系数，对应标准公式中的 λ。
+# 必须为正数，用于抑制控制输入剧烈变化。
+lambda_: 0.1
+
+# PPD 估计值与控制增量重置阈值，对应标准公式中的 ε。
+# 必须为正数。
+eps: 1.0e-5
+
+# 输出历史长度（FFDL 伪阶数 L_y）。
+# CFDL 与 PFDL 必须设为 0；FFDL 通常 >= 1。
+L_y: 0
+
+# 输入历史长度（CFDL/PFDL/FFDL 伪阶数 L_u）。
+# PFDL 下 >= 1；本示例使用 L_u = 2，对应两个 PJM 矩阵。
+L_u: 2
+
+# PJM 估计初始值与重置值，对应标准公式中的 Φ(0)。
+# 标量会广播为 dim × dim 对角矩阵。
+# 这里直接给出 L_u 个 dim × dim 矩阵，形状为 (L_u, dim, dim)。
+initial_phi:
+  - [[0.5, 0.0],
+     [0.0, 0.5]]
+  - [[0.3, 0.0],
+     [0.0, 0.3]]
+
+# 初始控制输入 u(0)（标量，填充所有通道）。
+u0: 0.0
+
+# 控制输入下限饱和值（可选）。
+# 设为 null 表示不施加下限。
+u_min: null
+
+# 控制输入上限饱和值（可选）。
+# 设为 null 表示不施加上限；若同时设置 u_min 与 u_max，须满足 u_min <= u_max。
+u_max: null
+
+# MIMO PJM 范数上界。任一 PJM 矩阵 Frobenius 范数超过该值时重置为 initial_phi。
+m_upper: 1.0e6
+
+# MIMO PJM 范数下界。任一 PJM 矩阵 Frobenius 范数低于该值时重置为 initial_phi。
+m_lower: 1.0e-6
+
+# 是否在控制器运行时记录每步数据。
+enable_logging: false
+
+# 日志保存的根目录（相对路径）。
+log_dir: "log"

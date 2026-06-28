@@ -73,6 +73,81 @@ class FFDLController:
     def set_rho_vector(self, rho: list[float]) -> None: ...
 
 
+class MimoCfdlController:
+    def __init__(
+        self,
+        dim: int,
+        *,
+        eta: float = 1.0,
+        mu: float = 1.0,
+        rho: float = 0.5,
+        lambda_: float = 0.02,
+        eps: float = 1e-5,
+        l_y: int = 0,
+        l_u: int = 1,
+        initial_phi: float = 0.5,
+        u0: float = 0.0,
+        m_upper: float = 1e6,
+        m_lower: float = 1e-6,
+    ) -> None: ...
+    def update(self, y: list[float], yd: list[float]) -> list[float]: ...
+    def reset(self) -> None: ...
+    def get_phi(self) -> list[list[list[float]]]: ...
+    def set_phi_hat(self, phi: list[list[list[float]]]) -> None: ...
+    @property
+    def dim(self) -> int: ...
+
+
+class MimoPfdlController:
+    def __init__(
+        self,
+        dim: int,
+        *,
+        eta: float = 1.0,
+        mu: float = 1.0,
+        rho: float = 0.5,
+        lambda_: float = 0.02,
+        eps: float = 1e-5,
+        l_y: int = 0,
+        l_u: int = 2,
+        initial_phi: float = 0.5,
+        u0: float = 0.0,
+        m_upper: float = 1e6,
+        m_lower: float = 1e-6,
+    ) -> None: ...
+    def update(self, y: list[float], yd: list[float]) -> list[float]: ...
+    def reset(self) -> None: ...
+    def get_phi(self) -> list[list[list[float]]]: ...
+    def set_phi_hat(self, phi: list[list[list[float]]]) -> None: ...
+    @property
+    def dim(self) -> int: ...
+
+
+class MimoFfdlController:
+    def __init__(
+        self,
+        dim: int,
+        *,
+        eta: float = 1.0,
+        mu: float = 1.0,
+        rho: float = 0.5,
+        lambda_: float = 0.02,
+        eps: float = 1e-5,
+        l_y: int = 1,
+        l_u: int = 2,
+        initial_phi: float = 0.5,
+        u0: float = 0.0,
+        m_upper: float = 1e6,
+        m_lower: float = 1e-6,
+    ) -> None: ...
+    def update(self, y: list[float], yd: list[float]) -> list[float]: ...
+    def reset(self) -> None: ...
+    def get_phi(self) -> list[list[list[float]]]: ...
+    def set_phi_hat(self, phi: list[list[list[float]]]) -> None: ...
+    @property
+    def dim(self) -> int: ...
+
+
 def pid_to_pfdl(kp: float, ti: float, td: float, ts: float, order: int = 3) -> list[float]: ...
 def zn_response_to_pfdl(k: float, tau: float, time_delay: float, ts: float, order: int = 3) -> list[float]: ...
 def critical_proportional_to_pfdl(ku: float, tu: float, ts: float, order: int = 3) -> list[float]: ...

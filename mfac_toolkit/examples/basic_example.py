@@ -6,7 +6,7 @@
 
 运行: uv run python -m mfac_toolkit.examples.basic_example
 
-修改 `mfac_toolkit/examples/config.yaml` 即可切换 CFDL/PFDL/FFDL 或调整参数.
+修改 `mfac_toolkit/examples/siso_config.yaml` 即可切换 CFDL/PFDL/FFDL 或调整参数.
 """
 
 from __future__ import annotations
@@ -58,7 +58,7 @@ def main() -> None:
     t = np.arange(n_steps, dtype=np.float64) * dt
     yd = reference(t)
 
-    config_path = Path(__file__).parent / "config.yaml"
+    config_path = Path(__file__).parent / "siso_config.yaml"
     config = MFACConfig.from_yaml(config_path)
     controller = create_controller(config)
 

@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import warnings
 from pathlib import Path
 from typing import Any, Self
 
@@ -18,6 +19,7 @@ class MFACConfig(BaseModel):
 
     属性:
         controller: 控制器格式，可选 "CFDL"、"PFDL"、"FFDL"。
+        dim: 系统维度，dim=1 为 SISO，dim>=2 为 MIMO；通过 YAML 改此值即可切换。
         eta: PPD 投影算法的学习率，需满足 0 < eta <= 2。
         mu: 投影算法分母中的正则化项，必须为正。
         rho: 控制律步长因子，需满足 0 < rho <= 1。
@@ -25,10 +27,15 @@ class MFACConfig(BaseModel):
         eps: PPD 估计值与控制增量重置阈值。
         L_y: 输出历史长度（FFDL 伪阶数），CFDL/PFDL 取 0。
         L_u: 输入历史长度（CFDL/PFDL/FFDL 伪阶数），至少为 1。
-        initial_phi: PPD 估计的初始值与重置值，标量将广播到所有通道。
+        initial_phi: PPD/PJM 估计的初始值与重置值。标量将广播到对应形状；
+            也可传入数组：SISO PFDL 为 (L_u,) 向量，SISO FFDL 为
+            (L_y + L_u,) 向量，MIMO CFDL 为 (dim, dim) 矩阵，MIMO PFDL/FFDL
+            为 (L_u 或 L_y + L_u, dim, dim) 的三维数组。
         u0: 初始控制输入。
         u_min: 控制输入可选的下限饱和值。
         u_max: 控制输入可选的上限饱和值。
+        m_upper: MIMO PJM 范数上界。
+        m_lower: MIMO PJM 范数下界。
         enable_logging: 是否在控制器运行时记录每步数据。
         log_dir: 日志保存的根目录（相对路径字符串）。
 
@@ -39,6 +46,7 @@ class MFACConfig(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     controller: str = Field(default="CFDL")
+    dim: int = Field(default=1, ge=1)
     eta: float = Field(default=1.0, gt=0.0, le=2.0)
     mu: float = Field(default=1.0, gt=0.0)
     rho: float = Field(default=0.1, gt=0.0, le=1.0)
@@ -46,10 +54,12 @@ class MFACConfig(BaseModel):
     eps: float = Field(default=1e-5, gt=0.0)
     L_y: int = Field(default=0, ge=0)
     L_u: int = Field(default=1, ge=1)
-    initial_phi: float = 0.5
+    initial_phi: float | list[float] | list[list[float]] | list[list[list[float]]] = 0.5
     u0: float = 0.0
     u_min: float | None = None
     u_max: float | None = None
+    m_upper: float = Field(default=1e6, gt=0.0)
+    m_lower: float = Field(default=1e-6, gt=0.0)
     enable_logging: bool = False
     log_dir: str = "log"
 
@@ -98,3 +108,22 @@ class MFACConfig(BaseModel):
         path = Path(path)
         with path.open("w", encoding="utf-8") as file:
             yaml.safe_dump(self.model_dump(), file, sort_keys=False)
+
+
+class MimoConfig(MFACConfig):
+    """MIMO MFAC 控制器配置.
+
+    .. deprecated::
+        请改用 ``MFACConfig(dim=...)``，此类将在未来版本移除。
+    """
+
+    dim: int = Field(default=2, ge=1)
+
+    def __init__(self, **data: Any) -> None:
+        """初始化并发出弃用警告."""
+        warnings.warn(
+            "MimoConfig 已弃用，请改用 MFACConfig(dim=...)。",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(**data)

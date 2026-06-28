@@ -52,3 +52,15 @@ def test_yaml_round_trip() -> None:
         cfg.to_yaml(path)
         loaded = MFACConfig.from_yaml(path)
         assert loaded == cfg
+
+
+def test_initial_phi_as_list() -> None:
+    """initial_phi 应接受列表并在 YAML 中往返."""
+    cfg = MFACConfig(controller="PFDL", L_u=3, initial_phi=[0.1, 0.2, 0.3])
+    assert cfg.initial_phi == [0.1, 0.2, 0.3]
+
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "cfg.yaml"
+        cfg.to_yaml(path)
+        loaded = MFACConfig.from_yaml(path)
+        assert loaded == cfg
