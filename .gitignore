@@ -24,7 +24,6 @@ dist/
 .ruff_cache/
 .coverage
 htmlcov/
-tests/
 
 # IDE
 .vscode/
@@ -41,6 +40,7 @@ log/
 
 # Private Rust core repository (cloned during CI/build)
 mfac_core/
+mfac_core
 
 # Example generated artifacts
 mfac_toolkit/examples/output/

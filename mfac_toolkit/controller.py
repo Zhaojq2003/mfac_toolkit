@@ -83,6 +83,7 @@ class CFDLController:
     def reset(self) -> None:
         """将控制器重置为初始状态."""
         self._backend.reset()
+        self._backend.set_phi_hat([float(self.config.initial_phi)])
         self.y_prev = 0.0
         self.u_prev = float(self.config.u0)
         self._step = 0
@@ -173,6 +174,7 @@ class PFDLController:
     def reset(self) -> None:
         """将控制器重置为初始状态."""
         self._backend.reset()
+        self._backend.set_phi_hat([float(self.config.initial_phi)] * self.config.L_u)
         self._prev_u = float(self.config.u0)
         self._prev_y = 0.0
         self._step = 0
@@ -264,6 +266,8 @@ class FFDLController:
     def reset(self) -> None:
         """将控制器重置为初始状态."""
         self._backend.reset()
+        dim = self.config.L_y + self.config.L_u
+        self._backend.set_phi_hat([float(self.config.initial_phi)] * dim)
         self._prev_u = float(self.config.u0)
         self._prev_y = 0.0
         self._step = 0

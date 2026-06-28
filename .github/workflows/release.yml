@@ -9,8 +9,38 @@ permissions:
   contents: write
 
 jobs:
+  checks:
+    name: Lint and Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout mfac_toolkit
+        uses: actions/checkout@v4
+
+      - name: Checkout private mfac_core
+        uses: actions/checkout@v4
+        with:
+          repository: Zhaojq2003/mfac_core
+          token: ${{ secrets.MFAC_CORE_TOKEN }}
+          path: mfac_core
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies and run checks
+        run: |
+          uv sync --extra dev --group dev
+          uv run ruff check .
+          uv run mypy .
+          uv run pytest
+
   build-wheels:
     name: Build wheels on ${{ matrix.os }}
+    needs: checks
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
