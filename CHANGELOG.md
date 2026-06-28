@@ -4,6 +4,19 @@
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-06-28
+
+### Added
+
+- 新增 pytest 测试，覆盖配置校验、数据记录器、控制器 reset/phi 维度、整定函数。
+- Release CI 新增 `checks` job，在构建 wheel 前运行 ruff、mypy、pytest。
+
+### Fixed
+
+- `FFDLController.reset()` 现在会清空 `rho_vector`。
+- 删除 `CFDLController` 中未使用的 `u_prev2` 状态。
+- 控制器 `reset()` 现在会显式将 `phi_hat` 恢复到 `initial_phi`。
+
 ## [1.0.1] - 2026-06-27
 
 ### Added
