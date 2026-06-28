@@ -65,6 +65,11 @@ python -m mfac_toolkit.examples.basic_example
 - `mfac_toolkit.examples.config`：YAML 配置示例
 - `mfac_toolkit.examples.plants`：示例被控对象
 
+## 文档
+
+- [API 速查表](./docs/api.md)
+- [更新日志](./CHANGELOG.md)
+
 ## 许可证
 
 本项目采用 [MIT 许可证](LICENSE) 开源。
