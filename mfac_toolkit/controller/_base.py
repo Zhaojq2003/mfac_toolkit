@@ -13,6 +13,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from mfac_toolkit.config import MFACConfig
+from mfac_toolkit.logger import DataLogger
 
 _core: Any = None
 with contextlib.suppress(ImportError):
@@ -106,3 +107,45 @@ def _broadcast_initial_phi(config: MFACConfig) -> NDArray[np.float64]:
             f"L_y={config.L_y}, L_u={config.L_u})"
         )
     return phi
+
+
+_STRUCTURAL_FIELDS: frozenset[str] = frozenset({"controller", "dim", "L_y", "L_u"})
+
+
+def _validate_param_update(config: MFACConfig, **kwargs: Any) -> MFACConfig:
+    """校验在线参数更新，返回新的已验证配置.
+
+    拒绝结构性字段；标量/边界字段通过构造新 ``MFACConfig`` 完成范围校验。
+    """
+    overlap = _STRUCTURAL_FIELDS & kwargs.keys()
+    if overlap:
+        names = ", ".join(sorted(overlap))
+        raise ValueError(
+            f"结构性参数（{names}）不能通过 set_params 在线调整，请使用 reconfigure(config)"
+        )
+    merged = {**config.model_dump(), **kwargs}
+    return MFACConfig(**merged)
+
+
+def _update_logger_config(logger: DataLogger | None, config: MFACConfig) -> None:
+    """同步更新记录器元数据中的配置对象."""
+    if logger is not None:
+        logger.set_metadata(config=config)
+
+
+def _apply_params(backend: Any, config: MFACConfig, **kwargs: Any) -> None:
+    """将已校验的参数变更应用到 Rust 后端."""
+    for key in kwargs:
+        if key == "lambda_":
+            backend.set_lambda(config.lambda_)
+        elif key == "initial_phi":
+            if config.dim == 1:
+                phi = _broadcast_initial_phi(config)
+                if config.controller == "CFDL":
+                    backend.set_initial_phi(phi.item())
+                else:
+                    backend.set_initial_phi(phi.tolist())
+            else:
+                backend.set_initial_phi(float(np.asarray(config.initial_phi, dtype=np.float64).item()))
+        else:
+            getattr(backend, f"set_{key}")(getattr(config, key))

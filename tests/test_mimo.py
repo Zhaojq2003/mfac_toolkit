@@ -114,3 +114,33 @@ def test_invalid_controller_raises() -> None:
     """非法 controller 类型应在工厂中抛出 ValueError."""
     with pytest.raises(ValueError):
         create_controller(MFACConfig(dim=2, controller="BAD"))
+
+
+def test_mimo_cfdl_set_params_updates_config() -> None:
+    """set_params 应更新 MIMO 控制器的 config 和 backend 参数."""
+    cfg = MFACConfig(dim=2, controller="CFDL", rho=0.5, m_upper=1e5)
+    controller = MimoCfdlController(cfg)
+    controller.set_params(rho=0.3, m_lower=1e-5)
+    assert controller.config.rho == 0.3
+    assert controller.config.m_lower == 1e-5
+
+
+def test_mimo_pfdl_set_params_rejects_structural() -> None:
+    """set_params 不应允许修改 controller 等结构性参数."""
+    controller = MimoPfdlController(MFACConfig(dim=2, controller="PFDL", L_u=2))
+    with pytest.raises(ValueError, match="结构性参数"):
+        controller.set_params(controller="FFDL")
+
+
+def test_mimo_ffdl_reconfigure_changes_order() -> None:
+    """Reconfigure 可修改 MIMO-FFDL 的 L_y/L_u 并正确重置状态."""
+    cfg = MFACConfig(dim=2, controller="FFDL", L_y=1, L_u=2)
+    controller = MimoFfdlController(cfg)
+    controller.set_phi_hat(np.stack([np.eye(2) * (i + 1) for i in range(3)]))
+
+    new_cfg = MFACConfig(dim=2, controller="FFDL", L_y=2, L_u=3)
+    controller.reconfigure(new_cfg)
+    assert controller.config.L_y == 2
+    assert controller.config.L_u == 3
+    assert controller.get_phi().shape == (5, 2, 2)
+    np.testing.assert_array_equal(controller.get_phi(), np.stack([np.eye(2) * new_cfg.initial_phi] * 5))

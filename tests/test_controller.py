@@ -78,3 +78,50 @@ def test_ffdl_initial_phi_vector() -> None:
 
     controller.reset()
     np.testing.assert_array_equal(controller.get_phi(), phi)
+
+
+def test_cfdl_set_params_updates_config() -> None:
+    """set_params 应更新 config 并使后续控制使用新参数."""
+    cfg = MFACConfig(controller="CFDL", rho=0.1, lambda_=0.02)
+    controller = CFDLController(cfg)
+    controller.set_params(rho=0.5, lambda_=0.1)
+    assert controller.config.rho == 0.5
+    assert controller.config.lambda_ == 0.1
+
+    controller.reset()
+    reference = CFDLController(MFACConfig(controller="CFDL", rho=0.5, lambda_=0.1))
+    np.testing.assert_allclose(controller.update(0.0, 1.0), reference.update(0.0, 1.0))
+
+
+def test_pfdl_set_params_rejects_structural() -> None:
+    """set_params 不应允许修改结构性参数."""
+    controller = PFDLController(MFACConfig(controller="PFDL", L_u=2))
+    with pytest.raises(ValueError, match="结构性参数"):
+        controller.set_params(L_u=3)
+
+
+def test_ffdl_set_params_rejects_invalid() -> None:
+    """set_params 对越界值应抛出校验异常."""
+    controller = FFDLController(MFACConfig(controller="FFDL", L_y=1, L_u=2))
+    with pytest.raises(ValueError):
+        controller.set_params(rho=2.0)
+
+
+def test_pfdl_reconfigure_changes_order() -> None:
+    """Reconfigure 可修改 L_u 并正确重置状态."""
+    cfg = MFACConfig(controller="PFDL", L_u=2)
+    controller = PFDLController(cfg)
+    controller.set_phi_hat([0.1, 0.2])
+
+    new_cfg = MFACConfig(controller="PFDL", L_u=3)
+    controller.reconfigure(new_cfg)
+    assert controller.config.L_u == 3
+    assert controller.get_phi().shape == (3,)
+    np.testing.assert_array_equal(controller.get_phi(), [new_cfg.initial_phi] * 3)
+
+
+def test_reconfigure_rejects_controller_change() -> None:
+    """Reconfigure 不允许切换控制器格式."""
+    controller = CFDLController(MFACConfig(controller="CFDL"))
+    with pytest.raises(ValueError, match="控制器格式"):
+        controller.reconfigure(MFACConfig(controller="PFDL", L_u=2))

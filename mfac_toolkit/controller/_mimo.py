@@ -13,11 +13,39 @@ from numpy.typing import NDArray
 
 from mfac_toolkit.config import MFACConfig
 from mfac_toolkit.controller._base import (
+    _apply_params,
     _broadcast_initial_phi,
     _core,
     _require_core,
+    _update_logger_config,
+    _validate_param_update,
 )
 from mfac_toolkit.logger import DataLogger
+
+
+def _set_params(ctrl: Any, **kwargs: Any) -> None:
+    """在线更新标量/边界参数，已通过 ``MFACConfig`` 校验."""
+    new_config = _validate_param_update(ctrl.config, **kwargs)
+    _apply_params(ctrl._backend, new_config, **kwargs)
+    ctrl.config = new_config
+    _update_logger_config(ctrl.logger, new_config)
+
+
+def _reconfigure(ctrl: Any, config: MFACConfig) -> None:
+    """用新配置重建后端；拒绝更改控制器格式或 SISO/MIMO 类别."""
+    if config.controller != ctrl.config.controller:
+        raise ValueError(
+            f"reconfigure 不允许更改控制器格式："
+            f"{ctrl.config.controller} -> {config.controller}"
+        )
+    if (config.dim == 1) != (ctrl.config.dim == 1):
+        raise ValueError("reconfigure 不允许在 SISO (dim=1) 与 MIMO (dim>=2) 之间切换")
+    new_controller = type(ctrl)(config, logger=ctrl.logger)
+    ctrl._backend = new_controller._backend
+    ctrl.config = config
+    ctrl.reset()
+    ctrl._step = 0
+    _update_logger_config(ctrl.logger, config)
 
 
 class MimoCfdlController:
@@ -97,6 +125,14 @@ class MimoCfdlController:
             )
         self._backend.set_phi_hat([phi_arr.tolist()])
 
+    def set_params(self, **kwargs: Any) -> None:
+        """在线更新标量/边界参数（如 rho、lambda_、m_upper 等）."""
+        _set_params(self, **kwargs)
+
+    def reconfigure(self, config: MFACConfig) -> None:
+        """使用新配置重建控制器；会重置状态."""
+        _reconfigure(self, config)
+
 
 class MimoPfdlController:
     """基于偏格式动态线性化的 MIMO 无模型自适应控制器."""
@@ -174,6 +210,14 @@ class MimoPfdlController:
             raise ValueError(f"phi 形状应为 {expected}，实际为 {phi_arr.shape}")
         self._backend.set_phi_hat(phi_arr.tolist())
 
+    def set_params(self, **kwargs: Any) -> None:
+        """在线更新标量/边界参数（如 rho、lambda_、m_upper 等）."""
+        _set_params(self, **kwargs)
+
+    def reconfigure(self, config: MFACConfig) -> None:
+        """使用新配置重建控制器；会重置状态."""
+        _reconfigure(self, config)
+
 
 class MimoFfdlController:
     """基于全格式动态线性化的 MIMO 无模型自适应控制器."""
@@ -248,3 +292,11 @@ class MimoFfdlController:
         if phi_arr.shape != expected:
             raise ValueError(f"phi 形状应为 {expected}，实际为 {phi_arr.shape}")
         self._backend.set_phi_hat(phi_arr.tolist())
+
+    def set_params(self, **kwargs: Any) -> None:
+        """在线更新标量/边界参数（如 rho、lambda_、m_upper 等）."""
+        _set_params(self, **kwargs)
+
+    def reconfigure(self, config: MFACConfig) -> None:
+        """使用新配置重建控制器；会重置状态."""
+        _reconfigure(self, config)
