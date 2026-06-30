@@ -101,6 +101,23 @@ MIMO 下 `y`、`yd`、`u` 均为形状 `(dim,)` 的 `numpy.ndarray`。
 controller.set_rho_vector([0.1, 0.2, ...])  # 长度须为 L_y + L_u
 ```
 
+## 在线参数调整
+
+所有控制器支持运行时不重建对象即可调整标量/边界参数：
+
+```python
+controller.set_params(rho=0.5, lambda_=0.05, u_min=-5.0, u_max=5.0)
+```
+
+可在线调整的字段包括：`eta`、`mu`、`rho`、`lambda_`、`eps`、`initial_phi`、`u0`、`u_min`、`u_max`、`m_upper`、`m_lower`、`enable_logging`、`log_dir`。结构性字段 `controller`、`dim`、`L_y`、`L_u` 不能通过 `set_params` 修改。
+
+若需更改伪阶数或系统维度，使用 `reconfigure` 传入新配置；这会重建后端并重置控制器状态，且不允许在 SISO（`dim=1`）与 MIMO（`dim>=2`）之间切换：
+
+```python
+new_config = MFACConfig(controller="PFDL", dim=1, L_u=3, rho=0.5)
+controller.reconfigure(new_config)
+```
+
 ## 数据记录
 
 `DataLogger` 可选启用。启用后会在 `log_dir/<timestamp>/` 下创建运行目录，写入 `metadata.yaml`，并以 CSV 追加每步数据到 `data.csv`。
@@ -140,6 +157,15 @@ apply_ffdl_zn_tuning(controller, k=1.0, tau=1.0, time_delay=0.1, ts=0.01)
 apply_ffdl_critical_tuning(controller, ku=10.0, tu=2.0, ts=0.01)
 ```
 
+若只想获取整定后的步长因子向量而不立即应用，使用原始函数：
+
+```python
+from mfac_toolkit import ffdl_zn_tuning, ffdl_critical_tuning
+
+rho_zn = ffdl_zn_tuning(controller, k=1.0, tau=1.0, time_delay=0.1, ts=0.01)
+rho_critical = ffdl_critical_tuning(controller, ku=10.0, tu=2.0, ts=0.01)
+```
+
 ## YAML 示例
 
 SISO 配置（`siso_config.yaml`）：
@@ -167,6 +193,11 @@ MIMO 配置（`mimo_config.yaml`）：
 ```yaml
 controller: "PFDL"
 dim: 2
+eta: 1.0
+mu: 1.0
+rho: 0.8
+lambda_: 0.1
+eps: 1.0e-5
 L_y: 0
 L_u: 2
 initial_phi:
@@ -174,8 +205,13 @@ initial_phi:
      [0.0, 0.5]]
   - [[0.3, 0.0],
      [0.0, 0.3]]
+u0: 0.0
+u_min: null
+u_max: null
 m_upper: 1.0e6
 m_lower: 1.0e-6
+enable_logging: false
+log_dir: "log"
 ```
 
 ## 类型约定
